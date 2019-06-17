@@ -90,7 +90,6 @@ $('.activities').on('change', (event) => {
     const text = $(input)
       .parent()
       .text();
-    console.log(input, text);
     return text;
   }
 
@@ -98,14 +97,10 @@ $('.activities').on('change', (event) => {
   function getPrice(text) {
     // Gets the index of the '$' in the string
     const priceIndex = text.indexOf('$');
-    console.log(priceIndex);
     // Gets the price
     const price = text.slice(priceIndex + 1);
-    console.log(typeof price);
-    console.log(price);
     // Converts string to number
     const priceInt = parseInt(price, 10);
-    console.log(typeof priceInt);
     return priceInt;
   }
 
@@ -113,13 +108,10 @@ $('.activities').on('change', (event) => {
   function updateDisplay(input, priceInt) {
     // Updates the total
     if (input.checked) {
-      console.log('is checked');
       total += priceInt;
     } else {
-      console.log('is not checked');
       total -= priceInt;
     }
-    console.log('total  ', total);
     // Displays updated total to screen
     $('#activities_total').text(`Total: $${total}`);
   }
@@ -130,12 +122,10 @@ $('.activities').on('change', (event) => {
   function getDate(text) {
     // Gets the index of the '—' in the string
     const dateStartIndex = text.indexOf('—');
-    console.log('dateIndex ', dateStartIndex);
     // Gets the index of the ',' in the string
     const dateEndIndex = text.indexOf(',');
     // Gets the day and time
     const dayTime = text.slice(dateStartIndex + 1, dateEndIndex);
-    console.log('dayTime', dayTime);
     return dayTime;
   }
 
@@ -144,16 +134,13 @@ $('.activities').on('change', (event) => {
   const eventText = getText($eventInput);
 
   $.each($('.activities input'), (i, input) => {
-    console.log(input);
     const isScheduleConflict = eventDayTime === getDate(getText(input));
     const isNotSameActivity = eventText !== getText(input);
-    console.log(isScheduleConflict, isNotSameActivity);
 
     if (isScheduleConflict && isNotSameActivity) {
       if ($eventInput.checked) {
         input.disabled = true;
       } else {
-        console.log('input.disabled false RAN ');
         input.disabled = false;
       }
     }
