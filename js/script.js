@@ -75,56 +75,87 @@ const $totalDiv = $('<div id="activities_total">???</div>');
 $('.activities').append($totalDiv);
 // Global variable for total
 let total = 0;
+
+// ******************************************
 // Responds to clicks on activities
 $('.activities').on('change', (event) => {
-  const $input = event.target;
+  const $eventInput = event.target;
   // NOTE: There is a difference between having a reference to an element
   // and having a reference to a selector of that element.
   // This may because one was not created with a jQuery selector... so it wasn't a jQuery object even though it was saved to something with a '$'
 
   // GET TEXT
-  // Gets text of item user selected
-  const text = $($input)
-    .parent()
-    .text();
-  console.log($input, text);
+  function getText(input) {
+    // Gets text of item user selected
+    const text = $(input)
+      .parent()
+      .text();
+    console.log(input, text);
+    return text;
+  }
 
   // GET PRICE
-  // Gets the index of the '$' in the string
-  const priceIndex = text.indexOf('$');
-  console.log(priceIndex);
-  // Gets the price
-  const price = text.slice(priceIndex + 1);
-  console.log(typeof price);
-  console.log(price);
-  // Converts string to number
-  const priceInt = parseInt(price, 10);
-  console.log(typeof priceInt);
-
-  // UPDATE DISPLAY
-  // Updates the total
-  if ($input.checked) {
-    console.log('is checked');
-    total += priceInt;
-  } else {
-    console.log('is not checked');
-    total -= priceInt;
+  function getPrice(text) {
+    // Gets the index of the '$' in the string
+    const priceIndex = text.indexOf('$');
+    console.log(priceIndex);
+    // Gets the price
+    const price = text.slice(priceIndex + 1);
+    console.log(typeof price);
+    console.log(price);
+    // Converts string to number
+    const priceInt = parseInt(price, 10);
+    console.log(typeof priceInt);
+    return priceInt;
   }
-  console.log('total  ', total);
-  // Displays updated total to screen
-  $('#activities_total').text(`Total: $${total}`);
+
+  // UPDATE DISPLAY (call only if a change)
+  function updateDisplay(input, priceInt) {
+    // Updates the total
+    if (input.checked) {
+      console.log('is checked');
+      total += priceInt;
+    } else {
+      console.log('is not checked');
+      total -= priceInt;
+    }
+    console.log('total  ', total);
+    // Displays updated total to screen
+    $('#activities_total').text(`Total: $${total}`);
+  }
+  // this is for updating values based on the item that initiated the callback...
+  updateDisplay($eventInput, getPrice(getText($eventInput)));
 
   // GET DATE
-  // Gets the index of the '—' in the string
-  const dateStartIndex = text.indexOf('—');
-  console.log('dateIndex ', dateStartIndex);
-  // Gets the index of the ',' in the string
-  const dateEndIndex = text.indexOf(',');
-  // Gets the day and time
-  const dayTime = text.slice(dateStartIndex + 1, dateEndIndex);
-  console.log('dayTime', dayTime);
+  function getDate(text) {
+    // Gets the index of the '—' in the string
+    const dateStartIndex = text.indexOf('—');
+    console.log('dateIndex ', dateStartIndex);
+    // Gets the index of the ',' in the string
+    const dateEndIndex = text.indexOf(',');
+    // Gets the day and time
+    const dayTime = text.slice(dateStartIndex + 1, dateEndIndex);
+    console.log('dayTime', dayTime);
+    return dayTime;
+  }
+
+  // For comparison in loop
+  const eventDayTime = getDate(getText($eventInput));
+  const eventText = getText($eventInput);
 
   $.each($('.activities input'), (i, input) => {
     console.log(input);
+    const isScheduleConflict = eventDayTime === getDate(getText(input));
+    const isNotSameActivity = eventText !== getText(input);
+    console.log(isScheduleConflict, isNotSameActivity);
+
+    if (isScheduleConflict && isNotSameActivity) {
+      if ($eventInput.checked) {
+        input.disabled = true;
+      } else {
+        console.log('input.disabled false RAN ');
+        input.disabled = false;
+      }
+    }
   });
 });
