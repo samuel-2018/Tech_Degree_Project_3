@@ -20,6 +20,9 @@ function themeSelected(event) {
    *    What is selected cannot be hidden. (?)
    *    To hide what would otherwise be the first item,
    *    first make another item the selection.
+   *    Example:
+   *    $("#payment option[value='credit card'").attr('selected', 'selected');
+   *    $('#payment option[value="select_method"').hide();
    * There is also a property 'selectedIndex'.
    * It affects things during run time.
    * Example: $('#color').prop('selectedIndex', 0);
@@ -70,13 +73,13 @@ function themeSelected(event) {
   }
 }
 // Creates div to hold the total
-const $totalDiv = $('<div id="activities_total">???</div>');
+const $totalDiv = $('<div id="activities_total"></div>');
 // Inserts the 'total' div into the dom
 $('.activities').append($totalDiv);
 // Global variable for total
 let total = 0;
 
-// ******************************************
+// **************ACTIVITIES****************************
 // Responds to clicks on activities
 $('.activities').on('change', (event) => {
   const $eventInput = event.target;
@@ -145,4 +148,51 @@ $('.activities').on('change', (event) => {
       }
     }
   });
+
+  // TO DO Refactor above, convert functions to obj
 });
+
+// **************PAYMENT INFO****************************
+// Selects 'credit'
+$("#payment option[value='credit card'").attr('selected', 'selected');
+// Hides the 'select a payment method'
+$('#payment option[value="select_method"').hide();
+// Hides info about paypal and bitcoin on page load
+$('#credit-card')
+  .nextAll()
+  .hide();
+// Hides or reveals payment info as needed
+$('#payment').on('change', (event) => {
+  switch (event.target.value) {
+    case 'credit card':
+      $('#credit-card').show();
+      $('#credit-card')
+        .nextAll()
+        .hide();
+      break;
+    case 'paypal':
+      $('#credit-card').hide();
+      $('#credit-card')
+        .next()
+        .next()
+        .hide();
+      $('#credit-card')
+        .next()
+        .show();
+      break;
+    case 'bitcoin':
+      $('#credit-card').hide();
+      $('#credit-card')
+        .next()
+        .hide();
+      $('#credit-card')
+        .next()
+        .next()
+        .show();
+      break;
+    default:
+      break;
+  }
+});
+
+// **************FORM VALIDATION************************
