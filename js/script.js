@@ -12,13 +12,6 @@ $('#colors-js-puns').hide();
 // get value of design selection
 $('#design').on('change', themeSelected);
 
-// // get value of color selection
-// $('#color').on('change', colorSelected);
-
-// function colorSelected(event) {
-//   console.log('colorSelected  ');
-// }
-
 function themeSelected(event) {
   /**
    * NOTES ON WORKING WITH SELECT > OPTION
@@ -71,7 +64,67 @@ function themeSelected(event) {
     // Sets which item is selected at first
     $('#color').prop('selectedIndex', 3);
 
+    // TO DO ... create a function to handle this dynamically
     // or use a selector to get a list of all options with 'show
     // then get the main list index value of the first item from that sub list, and dynamically use it for the selectedIndex
   }
 }
+// Creates div to hold the total
+const $totalDiv = $('<div id="activities_total">???</div>');
+// Inserts the 'total' div into the dom
+$('.activities').append($totalDiv);
+// Global variable for total
+let total = 0;
+// Responds to clicks on activities
+$('.activities').on('change', (event) => {
+  const $input = event.target;
+  // NOTE: There is a difference between having a reference to an element
+  // and having a reference to a selector of that element.
+  // This may because one was not created with a jQuery selector... so it wasn't a jQuery object even though it was saved to something with a '$'
+
+  // GET TEXT
+  // Gets text of item user selected
+  const text = $($input)
+    .parent()
+    .text();
+  console.log($input, text);
+
+  // GET PRICE
+  // Gets the index of the '$' in the string
+  const priceIndex = text.indexOf('$');
+  console.log(priceIndex);
+  // Gets the price
+  const price = text.slice(priceIndex + 1);
+  console.log(typeof price);
+  console.log(price);
+  // Converts string to number
+  const priceInt = parseInt(price, 10);
+  console.log(typeof priceInt);
+
+  // UPDATE DISPLAY
+  // Updates the total
+  if ($input.checked) {
+    console.log('is checked');
+    total += priceInt;
+  } else {
+    console.log('is not checked');
+    total -= priceInt;
+  }
+  console.log('total  ', total);
+  // Displays updated total to screen
+  $('#activities_total').text(`Total: $${total}`);
+
+  // GET DATE
+  // Gets the index of the '—' in the string
+  const dateStartIndex = text.indexOf('—');
+  console.log('dateIndex ', dateStartIndex);
+  // Gets the index of the ',' in the string
+  const dateEndIndex = text.indexOf(',');
+  // Gets the day and time
+  const dayTime = text.slice(dateStartIndex + 1, dateEndIndex);
+  console.log('dayTime', dayTime);
+
+  $.each($('.activities input'), (i, input) => {
+    console.log(input);
+  });
+});
