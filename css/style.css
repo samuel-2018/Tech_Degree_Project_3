@@ -179,3 +179,12 @@ button:hover {
     width: 49%;
   }
 }
+
+/* ================================= 
+  Form Validation
+==================================== */
+.err-msg {
+  margin-bottom: 1rem;
+  margin-top: -0.5rem;
+  color: brown;
+}
