@@ -206,8 +206,81 @@ $('#payment').on('change', (event) => {
   }
 });
 
-// **************FORM VALIDATION************************
+// *************************************************
+// ************** ERROR CHECKING *******************
+// *************************************************
+const isValid = {
+  name() {
+    return $('#name').val() !== '';
+  },
+  email() {
+    return /^[^@]{1,253}@[a-zA-Z0-9\-.]{1,253}\.[a-zA-Z]{2,6}$/.test($('#mail').val());
+  },
+  activity() {
+    const checkedItems = $('.activities').find(':checked');
+    return checkedItems.length;
+  },
+  // Checks whether credit card info is valid
+  card: {
+    cardAll() {
+      if (isValid.card.number() && isValid.card.zip() && isValid.card.cvv() && isValid.card.exp()) {
+        return true;
+      }
+      return false;
+    },
+    number() {
+      return /\d{13,16}/.test($('#cc-num').val());
+    },
 
+    zip() {
+      return /\d{5}/.test($('#zip').val());
+    },
+
+    cvv() {
+      return /\d{3}/.test($('#cvv').val());
+    },
+
+    exp() {
+      const date = new Date();
+      const currentYear = date.getFullYear();
+      const currentMonth = date.getMonth() + 1;
+      // Gets value of user selected month
+      const month = $('#exp-month > option:selected').val();
+      // Gets value of user selected year
+      const year = $('#exp-year > option:selected').val();
+      // Check whether card date is >= to current date
+      if (year >= currentYear) {
+        if (year > currentYear) {
+          return true;
+        }
+        if (month >= currentMonth) {
+          return true;
+        }
+        return false;
+      }
+      return false;
+    },
+  },
+
+  form() {
+    console.log('isformValid');
+    // Only checks card if card is selected as payment method.
+    if ($('#payment').prop('selectedIndex') === 1 && !isValid.card.cardAll()) {
+      return false;
+    }
+    if (isValid.name() && isValid.email() && isValid.activity()) {
+      return true;
+    }
+    return false;
+  },
+};
+
+function controlMsg(errName, isValid)
+
+
+
+
+// **************FORM VALIDATION**********************
 // All of these need to ba able to be called at form submission time
 // Some will be called when a field loses focus
 // Others will also be called in real time
@@ -216,222 +289,63 @@ $('#payment').on('change', (event) => {
 // <div id=""></div> *
 
 // For creating error handlers: hidden div with msg, event listener
-function createErrHandler(domTarget, errName, isValid, errMsg = null) {
+function createErrHandler(domTarget, errName, isValid, errMsg = null, elementToToggle = null) {
+  // Option: Leaving out 'errMsg' will result in no DOM element being created.
+  // Option: 'elementToToggle' is for hiding an element when primary element is shown and vice versa.
   if (errMsg) {
     const $msg = $(`<div id=${errName} class="err-msg" style="display: none">${errMsg}</div>`);
     $(domTarget).after($msg);
   }
   $(domTarget).on('blur change', () => {
-    controlMsg(errName, isValid);
+    controlMsg(errName, isValid, elementToToggle);
   });
 }
 // Used by event listeners and by submit function for master validation
-function controlMsg(errName, isValid) {
+function controlMsg(errName, isValid, elementToToggle = null) {
   if (isValid()) {
     $(`#${errName}`).hide();
+    // Option for showing an element when primary element is hidden.
+    elementToToggle ? $(elementToToggle).show() : '';
   } else {
     $(`#${errName}`).show();
+    // Option for hidding an element when primary element is shown.
+    elementToToggle ? $(elementToToggle).hide() : '';
   }
 }
-createErrHandler('#name', 'nameErr', isNameValid, 'Please provide your name.');
-
-// const nameErr = $(
-//   '<div id="nameErr" class="err-msg" style="display: none">Please provide your name.</div>',
-// );
-// $('#name').after(nameErr);
-
-// $('#name').on('blur change', () => {
-//   if (isNameValid()) {
-//     $('#nameErr').hide();
-//   } else {
-//     $('#nameErr').show();
-//   }
-// });
-
-const emailErr = $(
-  '<div id="emailErr" class="err-msg" style="display: none">Please provide a valid email address.</div>',
+// Creates error handlers
+createErrHandler('#name', 'nameErr', isValid.name, 'Please provide your name.');
+createErrHandler('#mail', 'emailErr', isValid.email, 'Please provide a valid email address.');
+createErrHandler(
+  '.activities',
+  'activitiesErr',
+  isValid.activity,
+  'Please choose an activity.',
+  '#activities_total',
 );
-$('#mail').after(emailErr);
-
-$('#mail').on('blur change', () => {
-  if (isEmailValid()) {
-    $('#emailErr').hide();
-  } else {
-    $('#emailErr').show();
-  }
-});
-
-const activitiesErr = $(
-  '<div id="activitiesErr" class="err-msg" style="display: none">Please choose an activity.</div>',
+createErrHandler(
+  '#cc-num',
+  'cardNumErr',
+  isValid.card.number,
+  'Please provide a 13 to 16 digit number.',
 );
-$('.activities').after(activitiesErr);
-
-$('.activities').on('change', () => {
-  if (isActivityValid()) {
-    $('#activities_total').show();
-    $('#activitiesErr').hide();
-  } else {
-    $('#activitiesErr').show();
-    $('#activities_total').hide();
-  }
-});
-// ********************************
-
-const $cardNumErr = $(
-  '<div id="cardNumErr" class="err-msg" style="display: none">Please provide a 13 to 16 digit number.</div>',
-);
-$('#cc-num').after($cardNumErr);
-
-$('#cc-num').on('blur change', () => {
-  if (isCreditValid.isCardValid()) {
-    $('#cardNumErr').hide();
-  } else {
-    $('#cardNumErr').show();
-  }
-});
-
-const $zipErr = $(
-  '<div id="zipErr" class="err-msg" style="display: none">Please provide a 5-digit number.</div>',
-);
-$('#zip').after($zipErr);
-
-$('#zip').on('blur change', () => {
-  if (isCreditValid.isZipValid()) {
-    $('#zipErr').hide();
-  } else {
-    $('#zipErr').show();
-  }
-});
-
-const cvvErr = $(
-  '<div id="cvvErr" class="err-msg" style="display: none">Please provide a 3-digit number.</div>',
-);
-$('#cvv').after(cvvErr);
-
-$('#cvv').on('blur change', () => {
-  if (isCreditValid.isCvvValid()) {
-    $('#cvvErr').hide();
-  } else {
-    $('#cvvErr').show();
-  }
-});
-
-const expErr = $(
-  '<div id="expErr" class="err-msg" style="display: none">Credit card has expired.</div>',
-);
-$('#exp-year').after(expErr);
-
-$('#exp-year').on('blur change', () => {
-  if (isCreditValid.isExpValid()) {
-    $('#expErr').hide();
-  } else {
-    $('#expErr').show();
-  }
-});
-$('#exp-month').on('blur change', () => {
-  if (isCreditValid.isExpValid()) {
-    $('#expErr').hide();
-  } else {
-    $('#expErr').show();
-  }
-});
-// ERROR CHECKING***********************************
-const isValid = {};
-function isNameValid() {
-  return $('#name').val() !== '';
-}
-function isEmailValid() {
-  return /^[^@]{1,253}@[a-zA-Z0-9\-.]{1,253}\.[a-zA-Z]{2,6}$/.test($('#mail').val());
-}
-function isActivityValid() {
-  const checkedItems = $('.activities').find(':checked');
-  return checkedItems.length;
-}
+createErrHandler('#zip', 'zipErr', isValid.card.zip, '>Please provide a 5-digit number.');
+createErrHandler('#cvv', 'cvvErr', isValid.card.cvv, 'Please provide a 3-digit number.');
+// The two expiration date handlers work together. Either one can hide or show same msg.
+createErrHandler('#exp-year', 'expErr', isValid.card.exp, 'Credit card has expired.');
+createErrHandler('#exp-month', 'expErr', isValid.card.exp);
 
 //* ******************************************* */
-// Checks whether credit card info is valid
-const isCreditValid = {
-  isCreditAll() {
-    if (
-      isCreditValid.isCardValid()
-      && isCreditValid.isZipValid()
-      && isCreditValid.isCvvValid()
-      && isCreditValid.isExpValid()
-    ) {
-      return true;
-    }
-    return false;
-  },
-  isCardValid() {
-    return /\d{13,16}/.test($('#cc-num').val());
-  },
-
-  isZipValid() {
-    return /\d{5}/.test($('#zip').val());
-  },
-
-  isCvvValid() {
-    return /\d{3}/.test($('#cvv').val());
-  },
-
-  isExpValid() {
-    const date = new Date();
-    const currentYear = date.getFullYear();
-    const currentMonth = date.getMonth() + 1;
-    // Gets value of user selected month
-    const month = $('#exp-month > option:selected').val();
-    // Gets value of user selected year
-    const year = $('#exp-year > option:selected').val();
-    // Check whether card date is >= to current date
-    if (year >= currentYear) {
-      if (year > currentYear) {
-        return true;
-      }
-      if (month >= currentMonth) {
-        return true;
-      }
-      return false;
-    }
-    return false;
-  },
-};
-
-function isFormValid() {
-  console.log('isformValid');
-  // TO DO only check card if card is selected as payment method
-  if (isNameValid() && isEmailValid() && isActivityValid() && isCreditAll()) {
-    console.log('all are valid is true');
-    return true;
-  }
-  return false;
-}
+const formErr = $(
+  '<div id="formErr" class="err-msg" style="display: none">Form cannot be submitted. Please check details.</div>',
+);
+$('form').append(formErr);
 
 $('form').on('submit', (event) => {
-  if (!isFormValid()) {
+  if (!isValid.form()) {
     event.preventDefault();
 
-    const formErr = $(
-      '<div id="formErr" class="err-msg" style="display: none">Form can not be submitted. Please check details.</div>',
-    );
-    $('form').append(formErr);
     $('#formErr').show();
-
-    // $('form').on('change', () => {
-    //   if (isformValid) {
-    //     $('#formErr').hide();
-    //   } else {
-    //     $('#formErr').show();
-    //   }
-    // });
   } else {
     $('#formErr').hide();
   }
-
-  // prevent default ?
-  // no page reload?
-  // but also, if it doesn't pass tests...
-  //
-  console.log('submit ran');
-
-  // create a master validator function
 });
