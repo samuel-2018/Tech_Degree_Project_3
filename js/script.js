@@ -12,6 +12,17 @@ $('#colors-js-puns').hide();
 // get value of design selection
 $('#design').on('change', themeSelected);
 
+$('#title').on('change', titleSelected);
+
+// Shows 'other' job role text field when needed
+function titleSelected(event) {
+  if ($('#title').val() === 'other') {
+    $('#other-title').show();
+  } else {
+    $('#other-title').hide();
+  }
+}
+
 function themeSelected(event) {
   /**
    * NOTES ON WORKING WITH SELECT > OPTION
@@ -196,3 +207,67 @@ $('#payment').on('change', (event) => {
 });
 
 // **************FORM VALIDATION************************
+
+// All of these need to ba able to be called at form submission time
+// Some will be called when a field loses focus
+// Others will also be called in real time
+
+// Creates hidden validation messages
+// <div id=""></div> *
+
+const nameErr = $(
+  '<div id="nameErr" class="err-msg" style="display: none">Please provide your name.</div>',
+);
+$('#name').after(nameErr);
+
+$('#name').on('blur change', () => {
+  if (isNameValid()) {
+    $('#nameErr').hide();
+  } else {
+    $('#nameErr').show();
+  }
+});
+
+const emailErr = $(
+  '<div id="emailErr" class="err-msg" style="display: none">Please provide a valid email address.</div>',
+);
+$('#mail').after(emailErr);
+
+$('#mail').on('blur change', () => {
+  if (isEmailValid()) {
+    $('#emailErr').hide();
+  } else {
+    $('#emailErr').show();
+  }
+});
+
+function isNameValid() {
+  console.log('isNameValid ran... val: ', $('#name').val());
+
+  return $('#name').val() !== '';
+}
+function isEmailValid() {
+  return /^[^@]{1,253}@[a-zA-Z0-9\-.]{1,253}\.[a-zA-Z]{2,6}$/.test($('#mail').val());
+}
+function isActivityValid() {
+  return $('.activities').val() !== 'null';
+}
+function isCreditValid() {
+  function isCardValid() {
+    return /\d{13-16}/.test($('#cc-num').val());
+  }
+  function isZipValid() {
+    return /\d{5}/.test($('#zip').val());
+  }
+  function isCvvValid() {
+    return /\d{3}/.test($('#cvv').val());
+  }
+  function isExpValid() {
+    const currentYear = new Date('year');
+    const currentMonth = new Date('monthIndex');
+    if ($('#exp-month').val() >= currentMonth && $('#exp-year').val() >= currentYear) {
+      return true;
+    }
+    return false;
+  }
+}
