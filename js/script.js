@@ -215,18 +215,38 @@ $('#payment').on('change', (event) => {
 // Creates hidden validation messages
 // <div id=""></div> *
 
-const nameErr = $(
-  '<div id="nameErr" class="err-msg" style="display: none">Please provide your name.</div>',
-);
-$('#name').after(nameErr);
-
-$('#name').on('blur change', () => {
-  if (isNameValid()) {
-    $('#nameErr').hide();
-  } else {
-    $('#nameErr').show();
+// For creating error handlers: hidden div with msg, event listener
+function createErrHandler(domTarget, errName, isValid, errMsg = null) {
+  if (errMsg) {
+    const $msg = $(`<div id=${errName} class="err-msg" style="display: none">${errMsg}</div>`);
+    $(domTarget).after($msg);
   }
-});
+  $(domTarget).on('blur change', () => {
+    controlMsg(errName, isValid);
+  });
+}
+// Used by event listeners and by submit function for master validation
+function controlMsg(errName, isValid) {
+  if (isValid()) {
+    $(`#${errName}`).hide();
+  } else {
+    $(`#${errName}`).show();
+  }
+}
+createErrHandler('#name', 'nameErr', isNameValid, 'Please provide your name.');
+
+// const nameErr = $(
+//   '<div id="nameErr" class="err-msg" style="display: none">Please provide your name.</div>',
+// );
+// $('#name').after(nameErr);
+
+// $('#name').on('blur change', () => {
+//   if (isNameValid()) {
+//     $('#nameErr').hide();
+//   } else {
+//     $('#nameErr').show();
+//   }
+// });
 
 const emailErr = $(
   '<div id="emailErr" class="err-msg" style="display: none">Please provide a valid email address.</div>',
@@ -315,7 +335,8 @@ $('#exp-month').on('blur change', () => {
     $('#expErr').show();
   }
 });
-
+// ERROR CHECKING***********************************
+const isValid = {};
 function isNameValid() {
   return $('#name').val() !== '';
 }
