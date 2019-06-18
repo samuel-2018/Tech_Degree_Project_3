@@ -84,7 +84,7 @@ function themeSelected(event) {
   }
 }
 // Creates div to hold the total
-const $totalDiv = $('<div id="activities_total"></div>');
+const $totalDiv = $('<div id="activities_total" class="activities_total"></div>');
 // Inserts the 'total' div into the dom
 $('.activities').append($totalDiv);
 // Global variable for total
@@ -241,33 +241,124 @@ $('#mail').on('blur change', () => {
   }
 });
 
-function isNameValid() {
-  console.log('isNameValid ran... val: ', $('#name').val());
+const activitiesErr = $(
+  '<div id="activitiesErr" class="err-msg" style="display: none">Please choose an activity.</div>',
+);
+$('.activities').after(activitiesErr);
 
+$('.activities').on('change', () => {
+  if (isActivityValid()) {
+    $('#activities_total').show();
+    $('#activitiesErr').hide();
+  } else {
+    $('#activitiesErr').show();
+    $('#activities_total').hide();
+  }
+});
+// ********************************
+
+const $cardNumErr = $(
+  '<div id="cardNumErr" class="err-msg" style="display: none">Please provide a 13 to 16 digit number.</div>',
+);
+$('#cc-num').after($cardNumErr);
+
+$('#cc-num').on('blur change', () => {
+  if (isCreditValid.isCardValid()) {
+    $('#cardNumErr').hide();
+  } else {
+    $('#cardNumErr').show();
+  }
+});
+
+const $zipErr = $(
+  '<div id="zipErr" class="err-msg" style="display: none">Please provide a 5-digit number.</div>',
+);
+$('#zip').after($zipErr);
+
+$('#zip').on('blur change', () => {
+  if (isCreditValid.isZipValid()) {
+    $('#zipErr').hide();
+  } else {
+    $('#zipErr').show();
+  }
+});
+
+const cvvErr = $(
+  '<div id="cvvErr" class="err-msg" style="display: none">Please provide a 3-digit number.</div>',
+);
+$('#cvv').after(cvvErr);
+
+$('#cvv').on('blur change', () => {
+  if (isCreditValid.isCvvValid()) {
+    $('#cvvErr').hide();
+  } else {
+    $('#cvvErr').show();
+  }
+});
+
+const expErr = $(
+  '<div id="expErr" class="err-msg" style="display: none">Credit card has expired.</div>',
+);
+$('#exp-year').after(expErr);
+
+$('#exp-year').on('blur change', () => {
+  if (isCreditValid.isExpValid()) {
+    $('#expErr').hide();
+  } else {
+    $('#expErr').show();
+  }
+});
+$('#exp-month').on('blur change', () => {
+  if (isCreditValid.isExpValid()) {
+    $('#expErr').hide();
+  } else {
+    $('#expErr').show();
+  }
+});
+
+function isNameValid() {
   return $('#name').val() !== '';
 }
 function isEmailValid() {
   return /^[^@]{1,253}@[a-zA-Z0-9\-.]{1,253}\.[a-zA-Z]{2,6}$/.test($('#mail').val());
 }
 function isActivityValid() {
-  return $('.activities').val() !== 'null';
+  const checkedItems = $('.activities').find(':checked');
+  return checkedItems.length;
 }
-function isCreditValid() {
-  function isCardValid() {
-    return /\d{13-16}/.test($('#cc-num').val());
-  }
-  function isZipValid() {
+
+// Checks whether credit card info is valid
+const isCreditValid = {
+  isCardValid() {
+    return /\d{13,16}/.test($('#cc-num').val());
+  },
+
+  isZipValid() {
     return /\d{5}/.test($('#zip').val());
-  }
-  function isCvvValid() {
+  },
+
+  isCvvValid() {
     return /\d{3}/.test($('#cvv').val());
-  }
-  function isExpValid() {
-    const currentYear = new Date('year');
-    const currentMonth = new Date('monthIndex');
-    if ($('#exp-month').val() >= currentMonth && $('#exp-year').val() >= currentYear) {
-      return true;
+  },
+
+  isExpValid() {
+    const date = new Date();
+    const currentYear = date.getFullYear();
+    const currentMonth = date.getMonth() + 1;
+    // Gets value of user selected month
+    const month = $('#exp-month > option:selected').val();
+    // Gets value of user selected year
+    const year = $('#exp-year > option:selected').val();
+    // Check whether card date is >= to current date
+    if (year >= currentYear) {
+      if (year > currentYear) {
+        return true;
+      }
+      if (month >= currentMonth) {
+        return true;
+      }
+      return false;
     }
     return false;
-  }
-}
+  },
+};
