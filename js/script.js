@@ -327,8 +327,20 @@ function isActivityValid() {
   return checkedItems.length;
 }
 
+//* ******************************************* */
 // Checks whether credit card info is valid
 const isCreditValid = {
+  isCreditAll() {
+    if (
+      isCreditValid.isCardValid()
+      && isCreditValid.isZipValid()
+      && isCreditValid.isCvvValid()
+      && isCreditValid.isExpValid()
+    ) {
+      return true;
+    }
+    return false;
+  },
   isCardValid() {
     return /\d{13,16}/.test($('#cc-num').val());
   },
@@ -362,3 +374,43 @@ const isCreditValid = {
     return false;
   },
 };
+
+function isFormValid() {
+  console.log('isformValid');
+  // TO DO only check card if card is selected as payment method
+  if (isNameValid() && isEmailValid() && isActivityValid() && isCreditAll()) {
+    console.log('all are valid is true');
+    return true;
+  }
+  return false;
+}
+
+$('form').on('submit', (event) => {
+  if (!isFormValid()) {
+    event.preventDefault();
+
+    const formErr = $(
+      '<div id="formErr" class="err-msg" style="display: none">Form can not be submitted. Please check details.</div>',
+    );
+    $('form').append(formErr);
+    $('#formErr').show();
+
+    // $('form').on('change', () => {
+    //   if (isformValid) {
+    //     $('#formErr').hide();
+    //   } else {
+    //     $('#formErr').show();
+    //   }
+    // });
+  } else {
+    $('#formErr').hide();
+  }
+
+  // prevent default ?
+  // no page reload?
+  // but also, if it doesn't pass tests...
+  //
+  console.log('submit ran');
+
+  // create a master validator function
+});
