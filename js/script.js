@@ -216,69 +216,88 @@ const isValid = {
   email() {
     return /^[^@]{1,253}@[a-zA-Z0-9\-.]{1,253}\.[a-zA-Z]{2,6}$/.test($('#mail').val());
   },
-  activity() {
+  activities() {
     const checkedItems = $('.activities').find(':checked');
     return checkedItems.length;
   },
   // Checks whether credit card info is valid
-  card: {
-    cardAll() {
-      if (isValid.card.number() && isValid.card.zip() && isValid.card.cvv() && isValid.card.exp()) {
+  // card: {
+
+  // },
+  cardAll() {
+    console.log('cardAll ran');
+
+    // Displays errors messages in each place needed
+    controlMsg('num');
+    controlMsg('zip');
+    controlMsg('cvv');
+    controlMsg('exp');
+    if (isValid.num() && isValid.zip() && isValid.cvv() && isValid.exp()) {
+      return true;
+    }
+    return false;
+  },
+  num() {
+    // Is value not empty?
+    if ($('#cc-num').val() !== '') {
+      // Shows msg if invalid
+      return /\d{13,16}/.test($('#cc-num').val());
+    }
+    // Hides msg if value is empty
+    return true;
+  },
+  numMissing() {
+    // Empty: show msg
+    // Not empty: hide msg
+    return $('#cc-num').val() !== '';
+  },
+  zip() {
+    return /\d{5}/.test($('#zip').val());
+  },
+
+  cvv() {
+    return /\d{3}/.test($('#cvv').val());
+  },
+
+  exp() {
+    const date = new Date();
+    const currentYear = date.getFullYear();
+    const currentMonth = date.getMonth() + 1;
+    // Gets value of user selected month
+    const month = $('#exp-month > option:selected').val();
+    // Gets value of user selected year
+    const year = $('#exp-year > option:selected').val();
+    // Check whether card date is >= to current date
+    if (year >= currentYear) {
+      if (year > currentYear) {
+        return true;
+      }
+      if (month >= currentMonth) {
         return true;
       }
       return false;
-    },
-    number() {
-      return /\d{13,16}/.test($('#cc-num').val());
-    },
-
-    zip() {
-      return /\d{5}/.test($('#zip').val());
-    },
-
-    cvv() {
-      return /\d{3}/.test($('#cvv').val());
-    },
-
-    exp() {
-      const date = new Date();
-      const currentYear = date.getFullYear();
-      const currentMonth = date.getMonth() + 1;
-      // Gets value of user selected month
-      const month = $('#exp-month > option:selected').val();
-      // Gets value of user selected year
-      const year = $('#exp-year > option:selected').val();
-      // Check whether card date is >= to current date
-      if (year >= currentYear) {
-        if (year > currentYear) {
-          return true;
-        }
-        if (month >= currentMonth) {
-          return true;
-        }
-        return false;
-      }
-      return false;
-    },
-  },
-
-  form() {
-    console.log('isformValid');
-    // Only checks card if card is selected as payment method.
-    if ($('#payment').prop('selectedIndex') === 1 && !isValid.card.cardAll()) {
-      return false;
     }
-    if (isValid.name() && isValid.email() && isValid.activity()) {
+    return false;
+  },
+  form() {
+    // Displays errors messages in each place needed
+    controlMsg('name');
+    controlMsg('email');
+    controlMsg('activities');
+
+    // Is card selected?
+    if ($('#payment').prop('selectedIndex') === 1) {
+      // Checks all fields
+      if (isValid.cardAll() && isValid.name() && isValid.email() && isValid.activities()) {
+        return true;
+      }
+      // Checks all non-card fields
+    } else if (isValid.name() && isValid.email() && isValid.activities()) {
       return true;
     }
     return false;
   },
 };
-
-function controlMsg(errName, isValid)
-
-
-
 
 // **************FORM VALIDATION**********************
 // All of these need to ba able to be called at form submission time
@@ -289,54 +308,51 @@ function controlMsg(errName, isValid)
 // <div id=""></div> *
 
 // For creating error handlers: hidden div with msg, event listener
-function createErrHandler(domTarget, errName, isValid, errMsg = null, elementToToggle = null) {
+function createErrHandler(domTarget, errName, errMsg = null, elementToToggle = null) {
   // Option: Leaving out 'errMsg' will result in no DOM element being created.
   // Option: 'elementToToggle' is for hiding an element when primary element is shown and vice versa.
   if (errMsg) {
-    const $msg = $(`<div id=${errName} class="err-msg" style="display: none">${errMsg}</div>`);
+    const $msg = $(
+      `<div id=${`${errName}Err`} class="err-msg" style="display: none">${errMsg}</div>`,
+    );
     $(domTarget).after($msg);
   }
-  $(domTarget).on('blur change', () => {
-    controlMsg(errName, isValid, elementToToggle);
+  $(domTarget).on('blur change keyup', () => {
+    controlMsg(errName, elementToToggle);
   });
 }
 // Used by event listeners and by submit function for master validation
-function controlMsg(errName, isValid, elementToToggle = null) {
-  if (isValid()) {
-    $(`#${errName}`).hide();
+function controlMsg(errName, elementToToggle = null) {
+  if (isValid[errName]()) {
+    $(`#${errName}Err`).hide();
     // Option for showing an element when primary element is hidden.
     elementToToggle ? $(elementToToggle).show() : '';
-  } else {
-    $(`#${errName}`).show();
-    // Option for hidding an element when primary element is shown.
-    elementToToggle ? $(elementToToggle).hide() : '';
+    // Return value WAS used by full form validator. BUT refactored. It is still needed for things to work (unknown reason)
+    return true;
   }
+  $(`#${errName}Err`).show();
+  // Option for hidding an element when primary element is shown.
+  elementToToggle ? $(elementToToggle).hide() : '';
+  // Return value WAS used by full form validator
+  // return false;
 }
 // Creates error handlers
-createErrHandler('#name', 'nameErr', isValid.name, 'Please provide your name.');
-createErrHandler('#mail', 'emailErr', isValid.email, 'Please provide a valid email address.');
-createErrHandler(
-  '.activities',
-  'activitiesErr',
-  isValid.activity,
-  'Please choose an activity.',
-  '#activities_total',
-);
-createErrHandler(
-  '#cc-num',
-  'cardNumErr',
-  isValid.card.number,
-  'Please provide a 13 to 16 digit number.',
-);
-createErrHandler('#zip', 'zipErr', isValid.card.zip, '>Please provide a 5-digit number.');
-createErrHandler('#cvv', 'cvvErr', isValid.card.cvv, 'Please provide a 3-digit number.');
+createErrHandler('#name', 'name', 'Please provide your name.');
+createErrHandler('#mail', 'email', 'Please provide a valid email address.');
+createErrHandler('.activities', 'activities', 'Please choose an activity.', '#activities_total');
+
+createErrHandler('#cc-num', 'num', 'Please enter a 13 to 16 digit number.');
+createErrHandler('#cc-num', 'numMissing', 'Please provide a credit card number');
+
+createErrHandler('#zip', 'zip', 'Please provide a 5-digit number.');
+createErrHandler('#cvv', 'cvv', 'Please provide a 3-digit number.');
 // The two expiration date handlers work together. Either one can hide or show same msg.
-createErrHandler('#exp-year', 'expErr', isValid.card.exp, 'Credit card has expired.');
-createErrHandler('#exp-month', 'expErr', isValid.card.exp);
+createErrHandler('#exp-year', 'exp', 'Credit card has expired.');
+createErrHandler('#exp-month', 'exp');
 
 //* ******************************************* */
 const formErr = $(
-  '<div id="formErr" class="err-msg" style="display: none">Form cannot be submitted. Please check details.</div>',
+  '<div id="formErr" class="err-msg" style="display: none">Form cannot be submitted. See error messages for details.</div>',
 );
 $('form').append(formErr);
 
