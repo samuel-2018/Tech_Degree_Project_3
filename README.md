@@ -2,6 +2,8 @@
 
 Project 3: Interactive Form (Tech Degree)
 
+![form-image](https://sam.stickle.us/static/images/project_3_landscape_1.jpg)
+
 ## Description
 
 Using progressive enhancement, this project utilizes JavaScript and jQuery to add features to a form.
