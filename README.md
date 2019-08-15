@@ -1,6 +1,4 @@
-# Tech_Degree_Project_3
-
-Project 3: Interactive Form (Tech Degree)
+# Project 3: Interactive Form (Tech Degree)
 
 ![form-image](https://sam.stickle.us/static/images/project_3_landscape_1.jpg)
 
