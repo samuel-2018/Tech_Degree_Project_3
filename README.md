@@ -8,7 +8,7 @@ Using progressive enhancement, this project utilizes JavaScript and jQuery to ad
 
 ## Main Features
 
-- ‘Other’ text field hidden until corresponding item selected from drop-down menu.
+- ‘Other’ text fields hidden until corresponding item selected from drop-down menu.
 - T-shirt color options are filtered based on theme selection.
 - Activity cost updated as user selects or deselects items.
 - Conflicting activities are disabled.
